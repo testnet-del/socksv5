@@ -24,7 +24,7 @@ Examples
 ```javascript
 var socks = require('socksv5');
 
-var srv = socks.createServer(function(info, accept, deny) {
+var srv = socks.createServer(function(info, accept, deny, error) {
   accept();
 });
 srv.listen(1080, 'localhost', function() {
@@ -39,16 +39,14 @@ srv.useAuth(socks.auth.None());
 ```javascript
 var socks = require('socksv5');
 
-var srv = socks.createServer(function(info, accept, deny) {
+var srv = socks.createServer(function(info, accept, deny, error) {
   accept();
 });
 srv.listen(1080, 'localhost', function() {
   console.log('SOCKS server listening on port 1080');
 });
 
-srv.useAuth(socks.auth.UserPassword(function(user, password, cb) {
-  cb(user === 'nodejs' && password === 'rules!');
-}));
+srv.useAuth(socks.auth.UserPassword('nodejs','rules!');
 ```
 
 * Server with no authentication and redirecting all connections to localhost:
@@ -56,7 +54,7 @@ srv.useAuth(socks.auth.UserPassword(function(user, password, cb) {
 ```javascript
 var socks = require('socksv5');
 
-var srv = socks.createServer(function(info, accept, deny) {
+var srv = socks.createServer(function(info, accept, deny, error) {
   info.dstAddr = 'localhost';
   accept();
 });
@@ -72,7 +70,7 @@ srv.useAuth(socks.auth.None());
 ```javascript
 var socks = require('socksv5');
 
-var srv = socks.createServer(function(info, accept, deny) {
+var srv = socks.createServer(function(info, accept, deny, error) {
   if (info.dstPort === 80)
     accept();
   else
@@ -90,7 +88,7 @@ srv.useAuth(socks.auth.None());
 ```javascript
 var socks = require('socksv5');
 
-var srv = socks.createServer(function(info, accept, deny) {
+var srv = socks.createServer(function(info, accept, deny, error) {
   if (info.dstPort === 80) {
     var socket;
     if (socket = accept(true)) {
@@ -179,7 +177,18 @@ Exports
 
 * **Server** - A class representing a SOCKS server.
 
-* **createServer**([< _function_ >connectionListener]) - _Server_ - Similar to `net.createServer()`.
+* **createServer**(<_ object_ >serverOptions, [< _function_ >connectionListener], < _object_ >chainProxyOptions) - _Server_ - Similar to `net.createServer()`.
+
+* **chainProxyOptions**
+Where 'chainProxyOptions' is object that similar to one you passing to client:
+```
+{
+ enabled: true, // optional, change proxOptions.enabled to false when relay not needed anymore
+ proxyHost: 'hostname or ip',
+ proxyPort: 1080,
+ auths: [ socks.auth.None() ]
+}
+```
 
 * **Client** - A class representing a SOCKS client.
 
@@ -211,7 +220,7 @@ Server events
 
 These are the same as [net.Server](http://nodejs.org/docs/latest/api/net.html#net_class_net_server) events, with the following exception(s):
 
-* **connection**(< _object_ >connInfo, < _function_ >accept, < _function_ >deny) - Emitted for each new (authenticated, if applicable) connection request. `connInfo` has the properties:
+* **connection**(< _object_ >connInfo, < _function_ >accept, < _function_ >deny, < _function_ >error) - Emitted for each new (authenticated, if applicable) connection request. `connInfo` has the properties:
 
     * **srcAddr** - _string_ - The remote IP address of the client that sent the request.
 
