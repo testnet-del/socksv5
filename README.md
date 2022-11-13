@@ -13,7 +13,7 @@ Requirements
 Install
 =======
 
-    npm install socksv5
+    npm install @testnet/socksv5
 
 
 Examples
