@@ -112,6 +112,26 @@ srv.listen(1080, 'localhost', function() {
 srv.useAuth(socks.auth.None());
 ```
 
+* Server with no authentication and proxy chain with authentication:
+
+```javascript
+var socks = require('socksv5');
+
+var srv = socks.createServer(function(info, accept, deny, error) {
+    accept();
+});
+srv.listen(1080, 'localhost', function() {
+  console.log('SOCKS server listening on port 1080');
+});
+
+srv.useAuth(socks.auth.None());
+srv.setProxyChain({
+    proxyHost:"155.155.155.155",
+    proxyPort:8181,
+    auths: [ socks.auth.UserPassword('proxyUser','proxyPassword') ]
+})
+```
+
 * Client with no authentication:
 
 ```javascript
@@ -177,18 +197,8 @@ Exports
 
 * **Server** - A class representing a SOCKS server.
 
-* **createServer**(<_ object_ >serverOptions, [< _function_ >connectionListener], < _object_ >chainProxyOptions) - _Server_ - Similar to `net.createServer()`.
+* **createServer**(<_ object_ >serverOptions, [< _function_ >connectionListener]) - _Server_ - Similar to `net.createServer()`.
 
-* **chainProxyOptions**
-Where 'chainProxyOptions' is object that similar to one you passing to client:
-```
-{
- enabled: true, // optional, change proxOptions.enabled to false when relay not needed anymore
- proxyHost: 'hostname or ip',
- proxyPort: 1080,
- auths: [ socks.auth.None() ]
-}
-```
 
 * **Client** - A class representing a SOCKS client.
 
@@ -244,6 +254,20 @@ These are the same as [net.Server](http://nodejs.org/docs/latest/api/net.html#ne
 
 * **useAuth**(< _function_ >authHandler) - _Server_ - Appends the `authHandler` to a list of authentication methods to allow for clients. This list's order is preserved and the first authentication method to match that of the client's list "wins." Returns the Server instance for chaining.
 
+* **setProxyChain**(< _object_ >proxyChainOptions) - _Server_ - Sets up proxy chain
+Where 'proxyChainOptions' is object options for proxy chain:
+```
+{
+ enabled: true, // optional, change proxyChainOptions.enabled to false when relay not needed anymore
+ proxyHost: 'hostname or ip',
+ proxyPort: 1080,
+ auths: [ socks.auth.None() ]
+}
+```
+
+* **getProxyChain**() - _object_ - Returns the current proxy chain servers or ```false```
+
+* **clearProxyChain**() - _boolean_ - Сlears the current proxy chain
 
 Client events
 -------------
